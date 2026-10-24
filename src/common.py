@@ -1,4 +1,5 @@
 import argparse
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -21,7 +22,7 @@ def parser(desc):
 def cached_features(data_dir, cache_dir, tag):
     from features import build_features
     if cache_dir:
-        path = Path(cache_dir) / f"features_v4_{tag}.parquet"  # v4 = phase-4 (flow gap stats + component ids)
+        path = Path(cache_dir) / f"features_v5_{tag}.parquet"  # v5 = v4 + split-stable deliv_asset_code
         if path.exists():
             return pd.read_parquet(path)
         f = build_features(data_dir)
@@ -34,7 +35,7 @@ def cached_features(data_dir, cache_dir, tag):
 def lgb_params():
     return dict(objective="binary", learning_rate=0.03, n_estimators=600, num_leaves=31,
                 min_child_samples=20, subsample=0.8, subsample_freq=1, colsample_bytree=0.6,
-                reg_lambda=1.0, random_state=SEED, n_jobs=8, verbose=-1)
+                reg_lambda=1.0, random_state=SEED, n_jobs=os.cpu_count() or 1, verbose=-1)
 
 
 def hgb_model():

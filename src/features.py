@@ -6,6 +6,7 @@ Offline investigation: windows may look both backwards and forwards in the 7-day
 """
 import json
 import sys
+import zlib
 from pathlib import Path
 
 import networkx as nx
@@ -103,7 +104,9 @@ def leg_features(data_dir, tx, pay_value):
     f["round_10"] = (np.abs(deliv_units / 10 - np.round(deliv_units / 10)) < 1e-6).astype(float)
     f["round_int"] = (np.abs(deliv_units - np.round(deliv_units)) < 1e-6).astype(float)
     f["n_decimals"] = [len(str(x).split(".")[1].rstrip("0")) if "." in str(x) else 0 for x in deliv_units]
-    f["deliv_asset_code"] = pd.factorize(pd.Series(deliv_asset).str.split(":").str[-1])[0]  # currency only
+    # currency only; crc32 gives the same code for the same currency in every split (pd.factorize did not:
+    # it numbers currencies in order of first appearance, so codes meant different things in train and test)
+    f["deliv_asset_code"] = [zlib.crc32(c.encode()) % 100_003 for c in pd.Series(deliv_asset).str.split(":").str[-1]]
     return f
 
 

@@ -15,9 +15,11 @@ src/predict.py        v3: weighted LightGBM (5 seeds) + HGB + logistic regressio
                       tie-breaker; writes + validates outputs/predictions_v3.csv and outputs/predictions.csv (no ties)
 src/explain.py        worked alerts: flow summary + top-3 LightGBM pred_contrib reasons -> outputs/example_alerts.md
 src/common.py         CLI args, default paths, LightGBM/HGB params, rank helper, training weights, smoothing,
-                      optional feature cache (features_v4_*.parquet)
+                      optional feature cache (features_v5_*.parquet)
 outputs/              cv_results.md, predictions.csv (= predictions_v3.csv, current), predictions_v2.csv and predictions_v1.csv
                       (earlier submissions, never overwritten), example_alerts.md (3 worked alerts)
+make_zip.py           builds the submission ZIP (git HEAD + predictions + CV results + SUBMISSION.md with commit hash)
+tests/                smoke tests on synthetic payments (no competition data needed)
 experiments/          dropped phase-2 experiments (hub relay features, stage-2 stacking, CV-grouping check); not used by the pipeline
 knowledge/approach.md study guide (XRPL, AML typologies, features, metric) with sources
 knowledge/pitch-brief.md   product / impact / security brief and 2-min pitch script (current numbers)
@@ -41,6 +43,10 @@ python src/train.py
 python src/predict.py
 # worked alerts with explanations -> outputs/example_alerts.md (needs outputs/predictions.csv; ~5 s with a warm cache)
 python src/explain.py
+# smoke tests (no data needed)
+python -m unittest discover -s tests
+# submission ZIP -> ../follow-the-drops-submission.zip (commit first: it packs git HEAD)
+python make_zip.py
 ```
 
 Custom paths / feature cache (keep the cache outside the repo):
@@ -64,7 +70,8 @@ python experiments/group_robustness.py --train-dir /path/to/train --cache-dir /t
 - Labels' `family`, `difficulty`, `scenario_id`, `cohort_id` are never used as features;
   `scenario_id` (NaN → unique id) is only the CV grouping key.
 - Seeds fixed (42); the final LightGBM is an average of seeds 42–46, and HGB/logistic regression use random_state 42.
-- Old caches (`features_v2_*`, `features_v3_*`) are ignored; the current cache is `features_v4_*` (adds gap features and component ids).
+- Old caches (`features_v2_*` to `features_v4_*`) are ignored; the current cache is `features_v5_*` (v4 + a `deliv_asset_code`
+  that means the same currency in every split; v4 numbered currencies per split with `pd.factorize`).
 - v3 training gives sample_weight 0 to positives of family aggregate_relay, distributed_relay or ambiguous; `family` is used
   only for this weight, never as a feature. Smoothing in CV uses same-fold scores only (no leakage across folds).
 
