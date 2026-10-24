@@ -7,7 +7,7 @@ the Chainalysis pages were re-opened on 24 Oct 2026 and their figures checked.*
 | | v1 | v2 | v3 (final) |
 |---|---|---|---|
 | CV AP ×100, GroupKFold(5) by scenario_id (our data) | 53.3 | 59.5 | **62.2 ± 4.8** |
-| Public leaderboard | 57.4 | 63.5 | 64.4 |
+| Public leaderboard | 57.4 | 63.5 | 64.4 (λ 0.5) → **64.5** (final, λ 0.25) |
 | Features (measured from `feature_columns`) | 175 | 235 | **247** |
 
 Starter baseline CV: 28.3. Top-1% review budget (v3, out-of-fold, our data): 401 alerts, about 350 true (precision 87.5%), about 28–30% of all laundering payments caught.

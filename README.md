@@ -76,5 +76,8 @@ python experiments/group_robustness.py --train-dir /path/to/train --cache-dir /t
 - v3 training gives sample_weight 0 to positives of family aggregate_relay, distributed_relay or ambiguous; `family` is used
   only for this weight, never as a feature. Smoothing in CV uses same-fold scores only (no leakage across folds).
 
+## Team
+Follow the Drops: Francesco Coccia (captain, sole member).
+
 ## Licence and attribution
 MIT, see `LICENSE`. Third-party components, libraries and AI assistance are listed in `ATTRIBUTION.md`.
