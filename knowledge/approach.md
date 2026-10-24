@@ -79,7 +79,30 @@ Leakage checks *(our data)*: SOURCE_FEE, TRANSACTION_INDEX and SEQUENCE alone sc
 ## 6. Where we are weak and what to try *(our data)*
 
 - Relay families (aggregate and distributed) are at about 1% within-family AP. They have only 6 positive scenarios each, and positives look like decoys at the transaction level.
-- The signal lives at **scenario level**: hub outflow ≈ 0.92–0.95 × inflow per episode with a consistent ~4.5h lag. Decoys don't conserve value. Next ideas are in the final report and `outputs/cv_results.md`.
+- Each relay cohort has 1 positive scenario and 99 near-identical decoy scenarios (10–28 txs over ~5.5 days). Scenario-level statistics (out/in ratio, lag, rotation) put the positives at random percentiles among their decoys, so 6 positives per family cannot teach a model the difference *(our data)*.
+
+## 7. Phase-2 experiments: what we tried, what we kept
+
+All numbers are grouped 5-fold CV, 100×AP, same folds as phase 1 *(our data)*. Scripts are in `experiments/` and are **not** part of the submission pipeline.
+
+| experiment | mean AP | std | verdict |
+|---|---|---|---|
+| stage-1 LightGBM (phase 1, kept) | **53.27** | 6.97 | kept |
+| + 47 hub relay features (`experiments/hub_cv.py`) | 50.78 | 6.66 | dropped |
+| stage-2 on neighbour aggregates only (`experiments/stacking_cv.py`) | 44.25 | 7.10 | dropped |
+| stage-2 on base + neighbour aggregates | 51.95 | 7.60 | dropped |
+| rank-blend 0.7·stage-1 + 0.3·stage-2 | 53.79 | 7.06 | dropped (+0.5 is far inside 1 std; doubles runtime) |
+
+**Hub relay features (#1).** We computed label-free, per-wallet stats: daily out/in log-ratio (median, spread, number of consistent days), lag since last inflow (median, IQR, CV), time-of-day concentration, counterparty rotation and overlap. These are ratios and spreads, not fixed constants like "4.5 h" or "0.93", so they survive batch shifts. They lifted aggregate_relay only from 0.87 to 0.92 and hurt other families (fan_out 68.76→63.62, bipartite 63.25→60.51, multi_stage 82.17→79.70), so we dropped them *(our data)*.
+
+**Stage-2 stacking (#2).** The idea comes from Elliptic: neighbourhood-aggregated features help every model ([Weber et al. 2019](https://arxiv.org/abs/1908.02591)). Here the thing we aggregate is the stage-1 *score*, over the sender/receiver neighbourhood, two hops, ±24 h, and high-score flow groups (connected components). To avoid leakage, the stage-1 scores used for training stage-2 are strictly out-of-fold (inner GroupKFold inside each outer fold). Stage-2 did not beat stage-1. The scenario-level grouping already keeps a scenario's txs in one fold, so neighbours' scores add little beyond the graph features stage-1 already sees *(our data)*.
+
+**Steering ideas checked.**
+- *Issuer / liquidity-provider collapsing.* `load_payments` already yields one effective sender→receiver edge per payment; the busiest wallet appears in only 256 of 40,131 train payments (0.6%). There is no issuer hub left to collapse *(our data)*.
+- *Coarse time buckets.* XRPL ledger `close_time` is rounded by `close_time_resolution`, up to 120 s ([XRPL ledger header](https://xrpl.org/docs/references/protocol/ledger-data/ledger-header)). Our time features are already windows of 10 min or more, so we did not add buckets.
+- *Grouping robustness.* `StratifiedGroupKFold` keeps groups non-overlapping while trying to preserve the class ratio ([scikit-learn StratifiedGroupKFold](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedGroupKFold.html)). Grouping by **sender** gives 69.12 ± 3.68, which is much higher than 53.27 by scenario. Scenario grouping is therefore the stricter, less optimistic estimate, and we keep it. The wallet graph is one connected component, so component grouping is impossible (`experiments/group_robustness.py`) *(our data)*.
+
+**Lesson for the pitch.** Negative results are honest results. On relays, the data generator makes positives and decoys statistically identical at every level we could measure. More features there mostly add noise for the families we already detect well.
 
 ## Sources opened
 - https://xrpl.org/docs/concepts/accounts
@@ -97,3 +120,5 @@ Leakage checks *(our data)*: SOURCE_FEE, TRANSACTION_INDEX and SEQUENCE alone sc
 - https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html
 - https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html
 - https://lightgbm.readthedocs.io/en/latest/Features.html
+- https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedGroupKFold.html
+- https://xrpl.org/docs/references/protocol/ledger-data/ledger-header
