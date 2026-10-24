@@ -49,6 +49,19 @@ python -m unittest discover -s tests
 python make_zip.py
 ```
 
+Leaderboard probes (all off by default; plain `python src/predict.py` reproduces the submitted v3 run bit for bit).
+A probe writes `outputs/predictions_<tag>.csv` + `outputs/run_<tag>.json` and never touches `predictions.csv`:
+```bash
+python src/predict.py --cache-dir /tmp/xrpl-cache --lam 0.1                       # smoothing weight
+python src/predict.py --cache-dir /tmp/xrpl-cache --smooth-sets 600u,3600f,120u   # extra flow set for smoothing
+python src/predict.py --cache-dir /tmp/xrpl-cache --weights 1,1,0                 # blend LGB,HGB,LR
+python src/predict.py --cache-dir /tmp/xrpl-cache --rank-features                 # per-split percentile features
+python src/predict.py --cache-dir /tmp/xrpl-cache --pseudo 400                    # pseudo-label top 400 / bottom 50% of test
+# make the best probe the final submission (writes predictions.csv + outputs/final_settings.json for make_zip.py)
+python src/predict.py --cache-dir /tmp/xrpl-cache <best switches> --as-final
+```
+These switches were tuned on the public leaderboard, not in grouped CV (`src/train.py` covers the default only).
+
 Custom paths / feature cache (keep the cache outside the repo):
 ```bash
 python src/train.py   --train-dir /path/to/train --cache-dir /tmp/xrpl-cache

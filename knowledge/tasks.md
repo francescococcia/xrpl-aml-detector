@@ -32,3 +32,7 @@
 - [ ] A3 Adversarial validation train vs test; drop or rank-normalise shifted features (hour/dow first)
 - [ ] A4 Funder features (first incoming payment = account creator; shared funder, siblings in the same flow)
 - [ ] A5 `python make_zip.py` after the final commit; upload ZIP + CSV; finish supporting-material step
+
+## Leaderboard probes (14:20, stop at 15:45)
+- [ ] L1 --lam 0.1 / 0.4      - [ ] L2 --smooth-sets 600u,3600f,120u      - [ ] L3 --weights 1,1,0
+- [ ] L4 --pseudo 400         - [ ] L5 --rank-features                     - [ ] L6 combine winners, --as-final, commit, make_zip

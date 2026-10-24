@@ -12,7 +12,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent
 TEAM, CAPTAIN, MEMBERS = "Follow the Drops", "Francesco Coccia", ["Francesco Coccia"]
-OUTPUTS = ("predictions.csv", "cv_results.md", "example_alerts.md")  # gitignored, so added explicitly
+OUTPUTS = ("predictions.csv", "cv_results.md", "example_alerts.md", "final_settings.json")  # gitignored, so added explicitly
 REQUIRED = ("outputs/predictions.csv", "outputs/cv_results.md")
 FORBIDDEN = (".parquet", ".zip", "labels.csv", ".env")
 MAX_ZIP, MAX_RAW, MAX_FILES = 8 * 2**20, 64 * 2**20, 2000
@@ -30,7 +30,8 @@ def submission_md(commit, branch, remote):
 - Members: {", ".join(MEMBERS)}
 - Commit: `{commit}` (branch `{branch}`)
 - Repository: {remote}
-- Predictions: `outputs/predictions.csv` (v3; one row per test TRANSACTION_HASH, scores in [0, 1], no ties)
+- Predictions: `outputs/predictions.csv` (one row per test TRANSACTION_HASH, scores in [0, 1], no ties); the exact
+  `predict.py` command and switches that produced it are in `outputs/final_settings.json`
 - Validation results: `outputs/cv_results.md` (GroupKFold(5) by scenario_id)
 - Model details and settings: `src/common.py` (LightGBM / HGB parameters, weights, smoothing), `src/predict.py` (blend);
   methodology in `docs/method_report.md` / `docs/method_report.pdf`
