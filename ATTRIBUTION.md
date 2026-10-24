@@ -26,13 +26,14 @@ None. No external labels, datasets, pre-trained models or APIs are used by the p
 ## AI assistance (disclosure)
 No LLM is called at run time: predictions and explanations come only from the code in `src/`.
 AI coding assistants were used during development; every change was reviewed and measured by the team.
+
 | tool / provider | used for | settings / reproducibility |
 |---|---|---|
-| Cursor (AI coding assistant) | drafting and editing code and docs, under `.cursor/rules/one-task.mdc` and `AGENTS.md` | interactive chat; outputs are not deterministic, so the committed code is the reproducible artefact |
-| Grok (xAI) | first draft of the feature pipeline (`src/features.py`) | interactive chat; reviewed and rewritten by the team |
-| Claude Code (Anthropic) | code audit; fix for the split-stable `deliv_asset_code`; `make_zip.py`; smoke tests; this file | interactive session; prompts asked to audit the solution and fix the findings |
+| Grok (xAI), chat assistant at grok.com | first draft of the feature pipeline (`src/features.py`), reviewed and rewritten by the team | interactive chat; outputs are not deterministic, so the committed code is the reproducible artefact |
+| Claude Code (Anthropic), cloud coding-agent session | code audit; split-stable `deliv_asset_code`; final smoothing λ 0.25; `make_zip.py`; smoke tests; `AGENTS.md` / `CLAUDE.md`; this file | interactive session, default settings; reviewed and measured by the team |
 
-Prompts were interactive task requests (one card from `knowledge/tasks.md` at a time), not part of the model.
+The shared instructions given to the assistants are in `AGENTS.md` (read by Claude Code through `CLAUDE.md`, pasted into
+Grok chats). Prompts were interactive task requests (one card from `knowledge/tasks.md` at a time), not part of the model.
 
 ## Sources consulted
 Listed with links in `knowledge/approach.md` and `docs/method_report.md`.

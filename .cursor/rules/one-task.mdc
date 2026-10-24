@@ -1,9 +1,9 @@
 ---
-description: one-task rules
+description: one-task rules (full rules and project knowledge in AGENTS.md)
 alwaysApply: true
 ---
-# Agent rules
+Read `AGENTS.md` at the repo root first: it holds every rule and the project knowledge, shared by all AI assistants.
 
-Take exactly one card from knowledge/tasks.md. Do only that card. Tick it, write a one-line note for the next agent, commit with the card id, and stop. If the card is bigger than 20 minutes, split it into new cards instead of continuing. Never commit or zip data files (*.parquet, labels.csv). Never write secrets to the repo.
-
-Context: read knowledge/event.md first. Metric is average precision on transaction-level scores; one score per TRANSACTION_HASH, never per transfer.
+Short version: take exactly one card from knowledge/tasks.md, do only that card, tick it, write a one-line note,
+commit with the card id, and stop. Never commit or zip data files (*.parquet, labels.csv). Never write secrets.
+One score per TRANSACTION_HASH; metric is average precision.
