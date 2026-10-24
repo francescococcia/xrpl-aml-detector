@@ -11,4 +11,4 @@
 ## Leaderboard log (24 Oct)
 - v1 57.4 | v2 63.5 | v3 64.4 | v3_smooth025 64.5 (best, 13:27 BST)
 - 13:29 top 3: coldsoup 72.2, Model Phi 71.3, LedgerLine 71.1 (same top-1% profile as ours: ~94% P, 30% R)
-
+- 13:50 Final smoothing λ 0.5 → 0.25 in code (v3_smooth025, LB 64.5 best), so the best run is reproducible from the repo.

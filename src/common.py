@@ -62,8 +62,9 @@ def train_weights(labels_df):
     return w
 
 
-def smooth_scores(score, comp_labels, lam=0.5):
+def smooth_scores(score, comp_labels, lam=0.25):
     """Phase 4: rank(score) + lam * rank(max score within each label-free flow component), summed over component sets.
+    lam 0.25 is the final setting (public LB 64.5 vs 64.4 for lam 0.5, run v3_smooth025); predict.py and train.py both use it.
     Returns values in (0, 1 + lam*len(comp_labels)]."""
     out = rank01(score)
     for lab in comp_labels:

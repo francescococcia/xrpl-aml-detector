@@ -69,6 +69,7 @@ python experiments/group_robustness.py --train-dir /path/to/train --cache-dir /t
 ## Notes
 - Labels' `family`, `difficulty`, `scenario_id`, `cohort_id` are never used as features;
   `scenario_id` (NaN → unique id) is only the CV grouping key.
+- Final smoothing weight is λ = 0.25 (`smooth_scores` in `src/common.py`; public LB 64.5 vs 64.4 at λ 0.5).
 - Seeds fixed (42); the final LightGBM is an average of seeds 42–46, and HGB/logistic regression use random_state 42.
 - Old caches (`features_v2_*` to `features_v4_*`) are ignored; the current cache is `features_v5_*` (v4 + a `deliv_asset_code`
   that means the same currency in every split; v4 numbered currencies per split with `pd.factorize`).

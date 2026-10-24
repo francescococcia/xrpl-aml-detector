@@ -43,9 +43,11 @@ class CommonTests(unittest.TestCase):
     def test_smoothing_range_and_order(self):
         score = np.array([0.9, 0.1, 0.2, 0.3])
         comp = np.array([0, 0, 1, 1])
-        sm = smooth_scores(score, [comp, comp])
-        self.assertTrue((sm > 0).all() and (sm <= 2).all())
-        self.assertGreater(sm[1], sm[2])  # low score lifted by a high-score flow neighbour
+        sm = smooth_scores(score, [comp, comp], lam=0.25)
+        self.assertTrue((sm > 0).all() and (sm <= 1.5).all())  # (0, 1 + lam * n_sets]
+        boost = sm - rank01(score)
+        self.assertGreater(boost[1], boost[2])  # a payment in a high-score flow gets the bigger lift
+        self.assertEqual(smooth_scores.__defaults__, (0.25,))  # final setting (LB 64.5)
         self.assertAlmostEqual(rank01(score).max(), 1.0)
 
     def test_train_weights_zero_relays(self):

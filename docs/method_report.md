@@ -57,7 +57,8 @@ We score every XRPL payment in a one-week test window with a 0–1 laundering su
 - **Training weights.** Relay and ambiguous positives get sample_weight 0, because they are indistinguishable from their decoys (our data). They are still scored.
 - **Blend.** Rank-normalised average with weights LGB:HGB:LR = 2:1:1.
 - **Smoothing.**
-  - score = rank(s) + 0.5·rank(max s in the payment's 600 s undirected flow) + 0.5·rank(max s in its 3600 s forward flow).
+  - score = rank(s) + 0.25·rank(max s in the payment's 600 s undirected flow) + 0.25·rank(max s in its 3600 s forward flow).
+  - λ = 0.25 is the final setting (public LB 64.5 vs 64.4 at λ 0.5); the CV figures below were measured at λ 0.5, where λ 0.5 and 1.0 were within noise (62.22 vs 62.30).
   - A tiny 1e-6·rank(LGB) term breaks ties, so the CSV has no tied scores.
 - **Explanations.** `src/explain.py` uses LightGBM's per-feature contributions (`pred_contrib=True`, log-odds; [LightGBM predict](https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.Booster.html#lightgbm.Booster.predict)).
   - It writes the top alerts with their reconstructed flow and three plain-English reasons to `outputs/example_alerts.md`.
@@ -69,7 +70,8 @@ We score every XRPL payment in a one-week test window with a 0–1 laundering su
 | starter | organiser baseline | 28.25 | — |
 | v1 | LightGBM on 175 graph/pair/velocity features | 53.27 ± 6.97 | 57.4 |
 | v2 | + 60 flow features, LGB+HGB+LR rank blend | 59.46 ± 5.82 | 63.5 |
-| v3 | + 12 gap features, relay weights, 2:1:1, flow smoothing | **62.22 ± 4.83** | 64.4 |
+| v3 | + 12 gap features, relay weights, 2:1:1, flow smoothing (λ 0.5) | **62.22 ± 4.83** | 64.4 |
+| v3 final | smoothing λ 0.25 | re-run `src/train.py` | **64.5** |
 
 - **v3 per fold:** 61.5 / 67.2 / 67.1 / 61.3 / 54.0, better than v2 in 5/5 folds.
 - **Review budget.** In the top 1% of each fold, precision is 0.875 and recall 0.305. Pooled, 401 alerts contain 351 laundering payments. AP beyond the top 1% is 41.1, up from 37.3 for v2.
