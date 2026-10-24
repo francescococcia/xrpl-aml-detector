@@ -73,6 +73,10 @@ FEATURE_GROUPS = {
              "sendmax_slack", "deliv_is_xrp", "deliv_asset_code", "round_100", "round_10", "round_int", "n_decimals"],
     # fixed USD thresholds and roundness
     "usd": ["just_under_1000", "just_under_3000", "just_under_5000", "just_under_10000", "usd_round_100"],
+    # features that shift between train and test (adversarial validation, outputs/diagnose.md section E;
+    # wallet-grouped adversarial AUC 0.998 -> 0.848). Dropped by default: grouped CV 61.75 -> 62.27, public LB 64.6 -> 64.9
+    "shift": ["dow", "value_cv_r_in", "s_out_cnt_7d", "s_out_sum_7d", "s_in_before_cnt_7d", "s_in_before_sum_7d",
+              "r_in_cnt_7d", "r_in_sum_7d", "r_out_after_cnt_7d", "r_out_after_sum_7d"],
 }
 
 

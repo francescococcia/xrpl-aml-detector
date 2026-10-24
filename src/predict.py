@@ -8,7 +8,7 @@ Leaderboard-probe switches (all off by default; the defaults reproduce the submi
   --smooth-sets S     flow component sets for smoothing, e.g. 600u,3600f,120u (u = undirected, f = forward)
   --weights a,b,c     rank-blend weights LightGBM,HGB,LR (0 = model not trained)
   --rank-features     replace every feature by its percentile rank within its own split (train / test separately)
-  --drop G1,G2        drop feature groups from common.FEATURE_GROUPS: time, legs, usd
+  --drop G1,G2        drop feature groups from common.FEATURE_GROUPS: time, legs, usd, shift (default: shift)
   --smooth-agg A      max (default) or mean score per flow component for smoothing
   --hgb-full          HGB without sklearn's automatic early stopping (trains on all rows, 500 iterations)
   --pseudo K          pseudo-labelling: add the top-K test rows as positives and the bottom --pseudo-neg share as
@@ -33,7 +33,7 @@ from train import _lr, fit_predict  # noqa: E402
 import lightgbm as lgb  # noqa: E402
 
 DEFAULTS = dict(lam=0.25, smooth_sets="600u,3600f", weights="2,1,1", rank_features=False, pseudo=0, pseudo_neg=0.5,
-                drop="", smooth_agg="max", hgb_full=False)
+                drop="shift", smooth_agg="max", hgb_full=False)
 
 
 def component_labels(te, sets, test_dir):
