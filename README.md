@@ -6,19 +6,23 @@ Metric: 100 × average precision (transaction level).
 ## Layout
 ```
 starter/payments.py   organiser helper (load_payments) — imported, not rewritten
-src/features.py       per-transaction graph + transfer-leg features (~190) + flow features
+src/features.py       per-transaction graph + transfer-leg features (175) + flow features; v3 uses 247 columns
 src/flows.py          label-free flow reconstruction (time-bounded shared-wallet components, 60 features + 12 gap-regularity
                       features) and the component ids used for post-hoc smoothing
 src/train.py          GroupKFold(5) CV: starter, v1, the v2 blend and the v3 pipeline; per-fold, top-1%, AP beyond top 1%,
                       per-family/difficulty AP
 src/predict.py        v3: weighted LightGBM (5 seeds) + HGB + logistic regression, rank blend 2:1:1, flow max-score smoothing,
                       tie-breaker; writes + validates outputs/predictions_v3.csv and outputs/predictions.csv (no ties)
+src/explain.py        worked alerts: flow summary + top-3 LightGBM pred_contrib reasons -> outputs/example_alerts.md
 src/common.py         CLI args, default paths, LightGBM/HGB params, rank helper, training weights, smoothing,
                       optional feature cache (features_v4_*.parquet)
 outputs/              cv_results.md, predictions.csv (= predictions_v3.csv, current), predictions_v2.csv and predictions_v1.csv
-                      (earlier submissions, never overwritten)
+                      (earlier submissions, never overwritten), example_alerts.md (3 worked alerts)
 experiments/          dropped phase-2 experiments (hub relay features, stage-2 stacking, CV-grouping check); not used by the pipeline
 knowledge/approach.md study guide (XRPL, AML typologies, features, metric) with sources
+knowledge/pitch-brief.md   product / impact / security brief and 2-min pitch script (current numbers)
+knowledge/training-pack.md background training pack (XRPL, AML, metric), corrected for this data
+docs/method_report.md|pdf  4-page methodology report
 ```
 
 ## Setup (Python 3.13)
@@ -35,12 +39,15 @@ Default data paths (relative to the repo root):
 python src/train.py
 # final v3 predictions -> outputs/predictions_v3.csv + outputs/predictions.csv (validated: one row per test tx, scores in [0,1], <12 MiB)
 python src/predict.py
+# worked alerts with explanations -> outputs/example_alerts.md (needs outputs/predictions.csv; ~5 s with a warm cache)
+python src/explain.py
 ```
 
 Custom paths / feature cache (keep the cache outside the repo):
 ```bash
 python src/train.py   --train-dir /path/to/train --cache-dir /tmp/xrpl-cache
 python src/predict.py --train-dir /path/to/train --test-dir /path/to/test --cache-dir /tmp/xrpl-cache --out-dir outputs
+python src/explain.py --train-dir /path/to/train --test-dir /path/to/test --cache-dir /tmp/xrpl-cache --out-dir outputs
 ```
 Cold run (no cache), 8 cores: train.py ~186 s (incl. train features; also re-runs v1/v2 for comparison), predict.py ~63 s (incl. test features); full pipeline ~4.2 min (measured 2026-10-24, v3).
 

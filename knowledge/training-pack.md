@@ -10,11 +10,12 @@
 - A consensus protocol lets participants agree on one ordered history without a central operator. It mainly solves the double-spend problem. ([xrpl.org: Consensus](https://xrpl.org/docs/concepts/consensus-protocol))
 - XRPL does not use mining or proof-of-stake. Each server trusts a chosen list of validators (its UNL). Consensus keeps going while fewer than 20% of trusted validators are faulty, and confirming an invalid transaction would need more than 80% to collude. ([Consensus](https://xrpl.org/docs/concepts/consensus-protocol))
 - Transactions are grouped into "ledger versions" (blocks). Each one holds the full current state, the set of transactions applied, and a header with an index, a hash and the parent. Once validated, a ledger is final. ([Consensus](https://xrpl.org/docs/concepts/consensus-protocol))
-- New ledgers usually close every 3–5 s. `close_time` is rounded to a 10 s resolution and strictly increases. ([Ledger close times](https://xrpl.org/docs/concepts/ledgers/ledger-close-times))
+- New ledgers usually close every 3–5 s. On mainnet, `close_time` is rounded to the close-time resolution, currently 10 s, and strictly increases. ([Ledger close times](https://xrpl.org/docs/concepts/ledgers/ledger-close-times))
+- **This competition's data is different:** every timestamp sits on a 2 s grid; the smallest gap between distinct timestamps is 4 s and the median is 12 s, in both train and test (our data, measured 24 Oct 2026).
 - The XRP supply is fixed: XRP can be destroyed but never created. ([Currency formats](https://xrpl.org/docs/references/protocol/data-types/currency-formats))
 
 **What this means for our detector**
-- Timestamps are only precise to roughly 10 s, so bucket time features (for example "seconds since previous hop") instead of trusting sub-10 s gaps. (advice, based on the [close-time rules](https://xrpl.org/docs/concepts/ledgers/ledger-close-times))
+- In this dataset, gaps of a few seconds are real signal (2 s grid, our data). Our flow windows (30 s, 2 min…) and gap-regularity features rely on that. On real mainnet data, gaps under 10 s would be rounding noise, so bucket them there. (advice, based on the [close-time rules](https://xrpl.org/docs/concepts/ledgers/ledger-close-times))
 - The `blocks` table equals ledgers. Ledger index is a clean ordering key for temporal features. (advice)
 
 **Judge Qs**
@@ -108,7 +109,8 @@ Notes:
 - Practical takeaways from those papers:
   - Graph features plus gradient boosting is a strong, defensible baseline. ([Altman](https://arxiv.org/abs/2306.16424))
   - Account IDs were deliberately **not** used as features, to avoid memorising accounts. ([Altman](https://arxiv.org/abs/2306.16424))
-  - Graph features were computed strictly from past data to prevent leakage. ([Altman, App. D](https://arxiv.org/abs/2306.16424))
+  - In Altman et al., graph features were computed strictly from past data to prevent leakage. ([Altman, App. D](https://arxiv.org/abs/2306.16424))
+  - **Our detector does not do this.** Several features look forwards within the data window, for example "did the receiver forward the money later?" and forward-linked flows up to 1 h. That is valid for a label-free batch investigation (T+1h), but not for real-time scoring. A streaming version would need past-only windows. (our data: `src/features.py`, `src/flows.py`)
 
 ## 6. Goals of the hackathon
 - Build an AI detector that scores each test transaction 0–1. Ranking is 100 × average precision on the hidden test set. (organiser brief)
@@ -136,7 +138,8 @@ Notes:
    - Calibration doesn't matter for the score; only ranking does. Any monotone transform (rank-averaging, logit) leaves AP unchanged.
    - Each positive pushed above a false positive at the top of the list is worth a lot.
 2. **Grouped validation.** Our data has many transactions per sender (676 senders over 7 days, (our data)), so samples are not i.i.d. Use `GroupKFold`/`StratifiedGroupKFold` so that one group never appears in both train and validation. ([sklearn CV §3.1.2.4](https://scikit-learn.org/stable/modules/cross_validation.html))
-   - Group by sender, or better by connected component or scheme, so pattern members don't leak across folds. (advice)
+   - **What we actually do:** `GroupKFold(5, shuffle=True, random_state=42)` grouped by the organiser's `scenario_id` (rows without a scenario get a unique id). That keeps all members of a laundering scheme or decoy in one fold. `scenario_id` is used only as the CV group key, never as a feature. (our data: `src/train.py`)
+   - Grouping by sender (StratifiedGroupKFold) gave a more optimistic CV: 69.1 vs 53.3 by scenario for v1, because one scheme spans many senders. The wallet graph is a single connected component, so component grouping is impossible (our data: `experiments/group_robustness.py`).
    - Stratification can hide true fold variance with rare classes, so report the mean ± std of AP across folds. ([sklearn CV](https://scikit-learn.org/stable/modules/cross_validation.html))
 3. **Avoid leakage.**
    - Fit any target-derived feature (neighbour label rates, out-of-fold risk propagation) inside the CV loop only. ([sklearn CV: transformations must be learnt on training folds](https://scikit-learn.org/stable/modules/cross_validation.html))
