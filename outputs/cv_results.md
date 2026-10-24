@@ -3,32 +3,32 @@
 | model | mean AP x100 | std | pooled OOF AP | precision@top1% | recall@top1% | AP beyond top1% |
 |---|---|---|---|---|---|---|
 | logreg_starter | 28.25 | 8.75 | 27.86 | 0.538 | 0.174 | 16.44 |
-| lightgbm_v1 | 53.27 | 6.97 | 53.26 | 0.781 | 0.264 | 31.26 |
-| lightgbm_flow | 58.10 | 5.35 | 57.74 | 0.852 | 0.293 | 36.48 |
-| hgb_flow | 58.88 | 5.51 | 58.46 | 0.871 | 0.299 | 37.43 |
-| logreg_all | 55.96 | 5.48 | 55.18 | 0.860 | 0.293 | 35.01 |
-| lightgbm_v3 | 61.08 | 5.08 | 60.56 | 0.852 | 0.295 | 42.65 |
-| hgb_v3 | 61.62 | 4.61 | 61.43 | 0.880 | 0.305 | 39.40 |
-| logreg_v3 | 55.45 | 5.84 | 54.94 | 0.837 | 0.286 | 35.55 |
-| blend_v2 | 59.46 | 5.82 | 58.00 | 0.875 | 0.301 | 37.26 |
-| blend_v3_unsmoothed | 61.12 | 5.42 | 59.36 | 0.865 | 0.300 | 40.53 |
-| v3 | 62.22 | 4.83 | 60.81 | 0.875 | 0.305 | 41.08 |
+| lightgbm_v1 | 53.03 | 6.81 | 53.13 | 0.773 | 0.260 | 31.96 |
+| lightgbm_flow | 57.86 | 5.57 | 57.45 | 0.844 | 0.290 | 37.33 |
+| hgb_flow | 58.45 | 5.41 | 57.86 | 0.859 | 0.296 | 38.21 |
+| logreg_all | 55.83 | 5.56 | 55.04 | 0.860 | 0.293 | 34.47 |
+| lightgbm_v3 | 61.04 | 5.07 | 60.41 | 0.857 | 0.296 | 41.98 |
+| hgb_v3 | 60.86 | 5.13 | 60.75 | 0.865 | 0.299 | 40.75 |
+| logreg_v3 | 55.35 | 5.76 | 54.89 | 0.835 | 0.285 | 35.74 |
+| blend_v2 | 59.25 | 5.82 | 57.78 | 0.860 | 0.297 | 38.28 |
+| blend_v3_unsmoothed | 60.86 | 5.54 | 59.06 | 0.865 | 0.300 | 40.09 |
+| v3 | 61.75 | 5.16 | 60.19 | 0.867 | 0.301 | 41.43 |
 
 Per-fold AP x100 (same folds for every model):
 
 | model               |   fold0 |   fold1 |   fold2 |   fold3 |   fold4 |
 |:--------------------|--------:|--------:|--------:|--------:|--------:|
 | logreg_starter      |   26.55 |   19.21 |   41.56 |   34.64 |   19.3  |
-| lightgbm_v1         |   52.26 |   53.65 |   62.31 |   56.95 |   41.16 |
-| lightgbm_flow       |   56.41 |   61.93 |   65.22 |   57.45 |   49.48 |
-| hgb_flow            |   56.89 |   63.09 |   66.1  |   58.25 |   50.07 |
-| logreg_all          |   53.97 |   59.43 |   62.22 |   57.8  |   46.4  |
-| lightgbm_v3         |   59.56 |   66.89 |   66.37 |   59.4  |   53.19 |
-| hgb_v3              |   60.06 |   66.74 |   66    |   61.31 |   53.98 |
-| logreg_v3           |   54.13 |   59.46 |   61.3  |   57.58 |   44.77 |
-| blend_v2            |   56.79 |   64.71 |   66.68 |   58.75 |   50.39 |
-| blend_v3_unsmoothed |   59.24 |   67.15 |   66.84 |   59.74 |   52.62 |
-| v3                  |   61.53 |   67.16 |   67.1  |   61.25 |   54.04 |
+| lightgbm_v1         |   51.84 |   53.07 |   62.8  |   55.71 |   41.73 |
+| lightgbm_flow       |   55.94 |   61.8  |   65.7  |   56.54 |   49.32 |
+| hgb_flow            |   56.91 |   62.58 |   65.58 |   57.38 |   49.8  |
+| logreg_all          |   53.65 |   59.4  |   62.23 |   57.65 |   46.2  |
+| lightgbm_v3         |   59.48 |   66.89 |   66.28 |   59.39 |   53.17 |
+| hgb_v3              |   60.35 |   66.73 |   65.74 |   58.96 |   52.51 |
+| logreg_v3           |   54.1  |   59.09 |   61.22 |   57.55 |   44.8  |
+| blend_v2            |   56.83 |   64.5  |   66.63 |   57.98 |   50.3  |
+| blend_v3_unsmoothed |   59.3  |   67.03 |   66.72 |   59.11 |   52.15 |
+| v3                  |   61.06 |   67.26 |   67.01 |   60.16 |   53.27 |
 
 Top-1% metrics are computed per validation fold (top 1% of that fold's txs) and averaged.
 
@@ -38,52 +38,52 @@ Adopted: **v3** (v1 = lightgbm_v1, v2 = blend_v2 = phase-3 submission; v3 = 2:1:
 
 | slice                         | name              |   n_pos |    AP |   AP_v2 |   AP_v1 |   AP_baseline |
 |:------------------------------|:------------------|--------:|------:|--------:|--------:|--------------:|
-| family (within-family AP)     | aggregate_relay   |     102 |  1.1  |    1.02 |    0.87 |          1.56 |
-| family (within-family AP)     | bipartite         |     134 | 58.51 |   63.98 |   63.25 |         69.15 |
-| family (within-family AP)     | chain             |      73 | 79.41 |   73.46 |   82.8  |         60    |
-| family (within-family AP)     | cycle             |      78 | 86.33 |   85.45 |   82.45 |         72.79 |
-| family (within-family AP)     | distributed_relay |      98 |  1.04 |    1.11 |    1.1  |          1.07 |
-| family (within-family AP)     | fan_in            |     101 | 90.22 |   89.47 |   72.38 |         85.63 |
-| family (within-family AP)     | fan_out           |      92 | 84.53 |   82.53 |   68.76 |         77.64 |
-| family (within-family AP)     | fan_out_in        |     178 | 86.37 |   83.21 |   92.92 |         85.35 |
-| family (within-family AP)     | multi_stage       |     173 | 89.39 |   86.45 |   82.17 |         79.17 |
-| family (within-family AP)     | random            |      80 | 74.74 |   66.67 |   54.28 |         54.02 |
-| family (within-family AP)     | stack             |     116 | 81.55 |   80.51 |   71.97 |         74.44 |
-| difficulty (vs all negatives) | easy              |     800 | 81.68 |   78.29 |   71.7  |         36.23 |
-| difficulty (vs all negatives) | medium            |     225 |  9.79 |    6.27 |    3.78 |          0.92 |
-| difficulty (vs all negatives) | hard              |     225 |  0.69 |    0.75 |    0.65 |          0.97 |
+| family (within-family AP)     | aggregate_relay   |     102 |  1.08 |    1    |    0.87 |          1.56 |
+| family (within-family AP)     | bipartite         |     134 | 58.31 |   63.11 |   61.84 |         69.15 |
+| family (within-family AP)     | chain             |      73 | 78.82 |   73.33 |   83.04 |         60    |
+| family (within-family AP)     | cycle             |      78 | 85.85 |   85.68 |   82.38 |         72.79 |
+| family (within-family AP)     | distributed_relay |      98 |  1.03 |    1.08 |    1.08 |          1.07 |
+| family (within-family AP)     | fan_in            |     101 | 89.66 |   89.63 |   72.02 |         85.63 |
+| family (within-family AP)     | fan_out           |      92 | 84.78 |   82.36 |   68.66 |         77.64 |
+| family (within-family AP)     | fan_out_in        |     178 | 86.78 |   82.95 |   93.35 |         85.35 |
+| family (within-family AP)     | multi_stage       |     173 | 88.57 |   86.12 |   82.37 |         79.17 |
+| family (within-family AP)     | random            |      80 | 73.03 |   66.61 |   54.66 |         54.02 |
+| family (within-family AP)     | stack             |     116 | 81.18 |   80.43 |   71.92 |         74.44 |
+| difficulty (vs all negatives) | easy              |     800 | 80.83 |   78.23 |   71.59 |         36.23 |
+| difficulty (vs all negatives) | medium            |     225 |  8.77 |    6.06 |    3.69 |          0.92 |
+| difficulty (vs all negatives) | hard              |     225 |  0.68 |    0.73 |    0.65 |          0.97 |
 
 ## Top 25 features (lightgbm_v3 gain %, full train, weighted)
 
 |                      |   gain_pct |
 |:---------------------|-----------:|
-| fl120_size           |      11.85 |
+| fl120_size           |      11.86 |
 | pair_total           |       8.79 |
-| fl120_nw             |       7.55 |
-| fl120_density        |       6.39 |
-| fl600_density        |       3.75 |
-| fl600_rate           |       3.43 |
-| fl600_dur            |       3.32 |
-| fl600_gapcv          |       3.11 |
-| pair_share_of_sender |       2.06 |
+| fl120_nw             |       7.52 |
+| fl120_density        |       6.43 |
+| fl600_density        |       3.72 |
+| fl600_rate           |       3.46 |
+| fl600_dur            |       3.3  |
+| fl600_gapcv          |       3.09 |
+| pair_share_of_sender |       2.03 |
 | pair_rank            |       1.85 |
 | fl600_v_std          |       1.47 |
-| fl120_dur            |       1.28 |
+| fl120_dur            |       1.25 |
 | s_in_best_sim_1h     |       1.21 |
-| fl120_gapcv          |       1.12 |
-| fl600_gapmed         |       1.08 |
-| flf600_rate          |       1.03 |
+| fl120_gapcv          |       1.11 |
+| fl600_gapmed         |       1.05 |
+| flf600_rate          |       1.04 |
 | r_fwd_best_sim_1h    |       1.03 |
-| s_out_cnt_6h         |       0.95 |
-| s_in_before_sum_6h   |       0.91 |
-| r_in_cnt_6h          |       0.83 |
-| r_out_after_sum_6h   |       0.78 |
-| fl600_size           |       0.71 |
-| r_in_cnt_10m         |       0.6  |
-| s_ep_lr_std          |       0.59 |
-| s_out_cnt_10m        |       0.57 |
+| s_out_cnt_6h         |       1    |
+| r_out_after_sum_6h   |       0.84 |
+| s_in_before_sum_6h   |       0.83 |
+| r_in_cnt_6h          |       0.81 |
+| fl600_size           |       0.74 |
+| r_in_cnt_10m         |       0.65 |
+| s_burst_10m          |       0.6  |
+| s_out_sum_24h        |       0.59 |
 
-Runtime: 185s, 247 features (175 phase-1 + 72 flow incl. gap stats)
+Runtime: 187s, 247 features (175 phase-1 + 72 flow incl. gap stats)
 
 <!-- hand-written notes below are kept on regeneration -->
 
@@ -207,3 +207,7 @@ Relays stay at ~1. Difficulty: easy 78.3 → 81.7, medium 6.3 → 9.8, hard 0.75
 Why smoothing works now but did not in phase 3 (+0.3–0.5 then): phase 3 tested one component set with the mean or max;
 here we use the max over two complementary sets (short undirected and long forward) and add it on the rank scale with λ 0.5,
 on top of better base models *(our data)*.
+
+
+## Final run (14:05 BST, main after audit fixes)
+- Split-stable `deliv_asset_code` (crc32) + smoothing weight 0.25 (best public LB run, 64.5). Final grouped CV: **v3 61.75 ± 5.16** (was 62.22 at smoothing 0.5 with the old per-split encoding; the drop is the smaller smoothing weight plus the encoding fix).
