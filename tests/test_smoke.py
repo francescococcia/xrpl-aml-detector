@@ -47,7 +47,7 @@ class CommonTests(unittest.TestCase):
         self.assertTrue((sm > 0).all() and (sm <= 1.5).all())  # (0, 1 + lam * n_sets]
         boost = sm - rank01(score)
         self.assertGreater(boost[1], boost[2])  # a payment in a high-score flow gets the bigger lift
-        self.assertEqual(smooth_scores.__defaults__, (0.25,))  # final setting (LB 64.5)
+        self.assertEqual(smooth_scores.__defaults__[0], 0.25)  # final setting (LB 64.5)
         self.assertAlmostEqual(rank01(score).max(), 1.0)
 
     def test_train_weights_zero_relays(self):

@@ -57,6 +57,8 @@ python src/predict.py --cache-dir /tmp/xrpl-cache --smooth-sets 600u,3600f,120u 
 python src/predict.py --cache-dir /tmp/xrpl-cache --weights 1,1,0                 # blend LGB,HGB,LR
 python src/predict.py --cache-dir /tmp/xrpl-cache --rank-features                 # per-split percentile features
 python src/predict.py --cache-dir /tmp/xrpl-cache --pseudo 400                    # pseudo-label top 400 / bottom 50% of test
+python src/predict.py --cache-dir /tmp/xrpl-cache --drop time,legs               # drop feature groups (common.FEATURE_GROUPS)
+python src/predict.py --cache-dir /tmp/xrpl-cache --smooth-agg mean --lam 1       # flow mean instead of max
 # make the best probe the final submission (writes predictions.csv + outputs/final_settings.json for make_zip.py)
 python src/predict.py --cache-dir /tmp/xrpl-cache <best switches> --as-final
 ```
@@ -74,6 +76,7 @@ CV (scenario-grouped 5-fold AP x100): v1 53.27 ± 6.97 → v2 59.46 ± 5.82 → 
 
 Optional experiments (documented in `outputs/cv_results.md` and `knowledge/approach.md` §7):
 ```bash
+python experiments/diagnose.py     --train-dir /path/to/train --test-dir /path/to/test --cache-dir /tmp/xrpl-cache  # ~5 min: where AP is lost -> outputs/diagnose.md
 python experiments/hub_cv.py          --train-dir /path/to/train --cache-dir /tmp/xrpl-cache   # ~1 min
 python experiments/stacking_cv.py     --train-dir /path/to/train --cache-dir /tmp/xrpl-cache   # ~2.5 min
 python experiments/group_robustness.py --train-dir /path/to/train --cache-dir /tmp/xrpl-cache  # ~1 min

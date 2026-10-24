@@ -12,3 +12,4 @@
 - v1 57.4 | v2 63.5 | v3 64.4 | v3_smooth025 64.5 (best, 13:27 BST)
 - 13:29 top 3: coldsoup 72.2, Model Phi 71.3, LedgerLine 71.1 (same top-1% profile as ours: ~94% P, 30% R)
 - 13:50 Final smoothing λ 0.5 → 0.25 in code (v3_smooth025, LB 64.5 best), so the best run is reproducible from the repo.
+- 14:40 Labels analysis: every scenario is all-positive or all-decoy; decoys copy family, shape and size. Task = scheme-level decision on ~130 positive vs ~150 decoy non-relay scenarios. Added experiments/diagnose.py (grouping headroom vs oracle, flow purity, scheme AUC, feature-group ablation, adversarial validation) and predict.py --drop / --smooth-agg.

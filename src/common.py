@@ -62,12 +62,32 @@ def train_weights(labels_df):
     return w
 
 
-def smooth_scores(score, comp_labels, lam=0.25):
+# feature groups that can be dropped in leaderboard probes / diagnostics (see experiments/diagnose.py)
+FEATURE_GROUPS = {
+    # absolute clock time: train, validation and test weeks start on different weekdays
+    "time": ["hour", "dow", "hour_sin", "hour_cos"],
+    # asset / conversion choices: the organiser README says they "do not inspect suspicious labels"
+    "legs": ["n_legs", "n_path_legs", "n_assets_legs", "asset_change", "has_sendmax", "has_paths", "conv_spread",
+             "sendmax_slack", "deliv_is_xrp", "deliv_asset_code", "round_100", "round_10", "round_int", "n_decimals"],
+    # fixed USD thresholds and roundness
+    "usd": ["just_under_1000", "just_under_3000", "just_under_5000", "just_under_10000", "usd_round_100"],
+}
+
+
+def drop_groups(cols, groups):
+    """Remove the named FEATURE_GROUPS (comma-separated string or list) from a column list."""
+    if isinstance(groups, str):
+        groups = [g.strip() for g in groups.split(",") if g.strip()]
+    gone = {c for g in groups for c in FEATURE_GROUPS[g]}
+    return [c for c in cols if c not in gone]
+
+
+def smooth_scores(score, comp_labels, lam=0.25, agg="max"):
     """Phase 4: rank(score) + lam * rank(max score within each label-free flow component), summed over component sets.
     lam 0.25 is the final setting (public LB 64.5 vs 64.4 for lam 0.5, run v3_smooth025); predict.py and train.py both use it.
     Returns values in (0, 1 + lam*len(comp_labels)]."""
     out = rank01(score)
     for lab in comp_labels:
-        cmax = pd.Series(score).groupby(lab).transform("max").values
+        cmax = pd.Series(score).groupby(lab).transform(agg).values
         out = out + lam * rank01(cmax)
     return out
