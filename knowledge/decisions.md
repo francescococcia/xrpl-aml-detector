@@ -16,3 +16,5 @@
 - 15:00 scan_columns: no raw column separates schemes from decoys (all inside chance band 0.5 ± 0.07 except Amount 0.61 = payment size, already modelled). blocks.parquet: one row per 4 s ledger, no tx signal. Found: HGB silently early-stops on a random 10% hold-out (sklearn default for > 10k rows); added predict.py --hgb-full.
 
 - 15:12 shiftdrop_dow_vcv_7d: drop the 10 train/test-shifted features (adversarial validation, outputs/diagnose.md E; AUC 0.998 -> 0.848). Grouped CV 61.75 -> 62.27 (5/5 folds). Public LB **64.9** (new best, was 64.6). Now the default: FEATURE_GROUPS['shift'], predict.py --drop shift.
+
+- 16:10 stage-2 learned neighbourhood smoother (experiments/stage2): 0.6 rank(base) + 0.4 rank(stage-2). Grouped CV +1.8 to +2.1. Public LB **65.7** (new best, file shiftdrop_plus_s2.csv).
