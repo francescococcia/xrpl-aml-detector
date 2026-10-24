@@ -44,3 +44,16 @@ Give every test transaction (40,101) a suspicion score 0–1 for planted money-l
 
 ## Help on site
 Mentors and tech staff for GPU environments, API credits and external-dataset questions.
+
+## Added from slides + terms (10:58)
+- Agenda: hacking 10:30-16:30, working lunch ~13:00. After 16:30: submission checks, winners, drinks.
+- Sizes: 40,131 labelled training tx, 40,101 test tx. Top 1% = 402 tx (diagnostic only, with ROC-AUC and F1). Only AP decides ranking; ties are resolved by the organisers.
+- Portal sign-in uses an organiser-issued access code. Upload ZIP + CSV together. **A CSV alone is not a complete final submission**: also complete the supporting-material step in the portal.
+- ZIP must ALSO contain: the test predictions CSV, validation results, model details/settings (or model files), team name, captain, members, and the **commit hash** being submitted.
+- Report/slides must cover: methodology, features, model or prompts, validation approach, results, interesting findings, limitations (incl. false positives, bias, uncertainty). Legible font.
+- **Terms 5.3: the entry must be PUBLIC (open-source repo) by the 16:30 deadline**, with LICENSE + attribution notices.
+- Terms 6.1: list every third-party lib/model/service with source + licence.
+- If using an LLM: disclose model/provider, prompts, settings and reproducibility limits.
+- Don't present results as evidence against real people; it's a research prototype, not a compliance tool.
+- Problems at submission: contact Narmin Rahimli straight away. Keep own backups and upload early.
+- Terms: https://hackathon.ukcbt.org/terms/2026-10-21
