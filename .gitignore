@@ -1,0 +1,15 @@
+# data stays outside the repo (never zip or commit it)
+*.parquet
+*.zip
+data/
+test-data/
+outputs/*
+!outputs/.gitkeep
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+# secrets
+.env
