@@ -21,7 +21,7 @@ def parser(desc):
 def cached_features(data_dir, cache_dir, tag):
     from features import build_features
     if cache_dir:
-        path = Path(cache_dir) / f"features_v3_{tag}.parquet"  # v3 = phase-3 flow features
+        path = Path(cache_dir) / f"features_v4_{tag}.parquet"  # v4 = phase-4 (flow gap stats + component ids)
         if path.exists():
             return pd.read_parquet(path)
         f = build_features(data_dir)
@@ -47,3 +47,25 @@ def rank01(x):
     """Rank-normalise scores to (0, 1]; used to average models on a common scale."""
     from scipy.stats import rankdata
     return rankdata(x) / len(x)
+
+
+RELAY_FAMILIES = ("aggregate_relay", "distributed_relay", "ambiguous")
+
+
+def train_weights(labels_df):
+    """Phase 4: weight 0 in TRAINING for relay/ambiguous positives (indistinguishable from their decoys, our data).
+    Uses the training-only family label; never a feature, and every row is still scored in CV."""
+    import numpy as np
+    w = np.ones(len(labels_df))
+    w[(labels_df.family.isin(RELAY_FAMILIES) & (labels_df.is_suspicious == 1)).values] = 0.0
+    return w
+
+
+def smooth_scores(score, comp_labels, lam=0.5):
+    """Phase 4: rank(score) + lam * rank(max score within each label-free flow component), summed over component sets.
+    Returns values in (0, 1 + lam*len(comp_labels)]."""
+    out = rank01(score)
+    for lab in comp_labels:
+        cmax = pd.Series(score).groupby(lab).transform("max").values
+        out = out + lam * rank01(cmax)
+    return out

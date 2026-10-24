@@ -57,19 +57,39 @@ def _group_stats(lab, s, r, t, v, win, tag, wallet_cnt):
     return o
 
 
-def flow_features(sender, receiver, t, value, und=UNDIRECTED_WINDOWS, fwdw=FORWARD_WINDOWS, extra=False):
+SMOOTH_KEYS = ((600, False), (3600, True))  # components used for post-hoc max-score smoothing (phase 4)
+
+
+def _gap_stats(lab, t, tag):
+    """Regularity of a flow: log median gap between consecutive payments and the gap coefficient of variation."""
+    d = pd.DataFrame({"g": lab, "t": t}).sort_values(["g", "t"], kind="stable")
+    d["gap"] = d.groupby("g").t.diff()
+    g = d.groupby("g").gap
+    med, cv = g.median(), g.std() / g.mean()
+    return {f"{tag}_gapmed": np.log1p(med.reindex(lab).fillna(0).values),
+            f"{tag}_gapcv": cv.reindex(lab).fillna(-1).values}
+
+
+def flow_features(sender, receiver, t, value, und=UNDIRECTED_WINDOWS, fwdw=FORWARD_WINDOWS, extra=False, gaps=True):
     codes = pd.factorize(np.r_[sender, receiver])[0]
     n = len(t)
     s, r = codes[:n], codes[n:]
     t = np.asarray(t, dtype=np.int64)
     v = np.log1p(np.asarray(value, dtype=float))
     wallet_cnt = np.bincount(codes, minlength=codes.max() + 1).astype(float)
-    out = {}
+    out, gap, labs = {}, {}, {}
     for fwd, wins in ((False, und), (True, fwdw)):
         for win in wins:
             lab = _components(s, r, t, win, fwd)
-            o = _group_stats(lab, s, r, t, v, win, f"fl{'f' if fwd else ''}{win}", wallet_cnt)
+            tag = f"fl{'f' if fwd else ''}{win}"
+            o = _group_stats(lab, s, r, t, v, win, tag, wallet_cnt)
             if not extra:  # pass-through / activity-share stats did not help in CV (our data)
                 o = {k: x for k, x in o.items() if not k.endswith(("_pass", "_s_share", "_r_share"))}
             out.update(o)
+            if gaps:  # phase 4
+                gap.update(_gap_stats(lab, t, tag))
+            if (win, fwd) in SMOOTH_KEYS:  # component ids (not features; '_' prefix) for score smoothing
+                labs[f"_lab{win}{'f' if fwd else 'u'}"] = lab
+    out.update(gap)  # gap columns last, after the 60 phase-3 columns
+    out.update(labs)
     return pd.DataFrame(out)

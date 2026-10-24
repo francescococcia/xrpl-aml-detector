@@ -7,12 +7,16 @@ Metric: 100 × average precision (transaction level).
 ```
 starter/payments.py   organiser helper (load_payments) — imported, not rewritten
 src/features.py       per-transaction graph + transfer-leg features (~190) + flow features
-src/flows.py          label-free flow reconstruction (time-bounded shared-wallet components, 60 features)
-src/train.py          GroupKFold(5) CV: starter, v1 (phase-1 LightGBM), flow models and the v2 blend; per-fold, top-1%, per-family/difficulty AP
-src/predict.py        v2: LightGBM (5 seeds) + HistGradientBoosting + logistic regression, equal rank average;
-                      writes + validates outputs/predictions_v2.csv and outputs/predictions.csv
-src/common.py         CLI args, default paths, LightGBM/HGB params, rank helper, optional feature cache (features_v3_*.parquet)
-outputs/              cv_results.md, predictions.csv (= predictions_v2.csv, current), predictions_v1.csv (phase-1 submission, never overwritten)
+src/flows.py          label-free flow reconstruction (time-bounded shared-wallet components, 60 features + 12 gap-regularity
+                      features) and the component ids used for post-hoc smoothing
+src/train.py          GroupKFold(5) CV: starter, v1, the v2 blend and the v3 pipeline; per-fold, top-1%, AP beyond top 1%,
+                      per-family/difficulty AP
+src/predict.py        v3: weighted LightGBM (5 seeds) + HGB + logistic regression, rank blend 2:1:1, flow max-score smoothing,
+                      tie-breaker; writes + validates outputs/predictions_v3.csv and outputs/predictions.csv (no ties)
+src/common.py         CLI args, default paths, LightGBM/HGB params, rank helper, training weights, smoothing,
+                      optional feature cache (features_v4_*.parquet)
+outputs/              cv_results.md, predictions.csv (= predictions_v3.csv, current), predictions_v2.csv and predictions_v1.csv
+                      (earlier submissions, never overwritten)
 experiments/          dropped phase-2 experiments (hub relay features, stage-2 stacking, CV-grouping check); not used by the pipeline
 knowledge/approach.md study guide (XRPL, AML typologies, features, metric) with sources
 ```
@@ -29,7 +33,7 @@ Default data paths (relative to the repo root):
 ```bash
 # cross-validation report -> outputs/cv_results.md
 python src/train.py
-# final v2 predictions -> outputs/predictions_v2.csv + outputs/predictions.csv (validated: one row per test tx, scores in [0,1], <12 MiB)
+# final v3 predictions -> outputs/predictions_v3.csv + outputs/predictions.csv (validated: one row per test tx, scores in [0,1], <12 MiB)
 python src/predict.py
 ```
 
@@ -38,9 +42,9 @@ Custom paths / feature cache (keep the cache outside the repo):
 python src/train.py   --train-dir /path/to/train --cache-dir /tmp/xrpl-cache
 python src/predict.py --train-dir /path/to/train --test-dir /path/to/test --cache-dir /tmp/xrpl-cache --out-dir outputs
 ```
-Cold run (no cache), 8 cores: train.py ~93 s (incl. train features), predict.py ~57 s (incl. test features); full pipeline ~2.5 min (measured 2026-10-24, v2).
+Cold run (no cache), 8 cores: train.py ~186 s (incl. train features; also re-runs v1/v2 for comparison), predict.py ~63 s (incl. test features); full pipeline ~4.2 min (measured 2026-10-24, v3).
 
-CV (scenario-grouped 5-fold AP x100): v1 53.27 ± 6.97 → v2 59.46 ± 5.82, better in 5/5 folds; see `outputs/cv_results.md`.
+CV (scenario-grouped 5-fold AP x100): v1 53.27 ± 6.97 → v2 59.46 ± 5.82 → v3 62.22 ± 4.83 (v3 better than v2 in 5/5 folds); see `outputs/cv_results.md`.
 
 Optional experiments (documented in `outputs/cv_results.md` and `knowledge/approach.md` §7):
 ```bash
@@ -53,7 +57,9 @@ python experiments/group_robustness.py --train-dir /path/to/train --cache-dir /t
 - Labels' `family`, `difficulty`, `scenario_id`, `cohort_id` are never used as features;
   `scenario_id` (NaN → unique id) is only the CV grouping key.
 - Seeds fixed (42); the final LightGBM is an average of seeds 42–46, and HGB/logistic regression use random_state 42.
-- Old caches (`features_v2_*`) are ignored; flow features are in `features_v3_*`.
+- Old caches (`features_v2_*`, `features_v3_*`) are ignored; the current cache is `features_v4_*` (adds gap features and component ids).
+- v3 training gives sample_weight 0 to positives of family aggregate_relay, distributed_relay or ambiguous; `family` is used
+  only for this weight, never as a feature. Smoothing in CV uses same-fold scores only (no leakage across folds).
 
 ## Licence and attribution
 MIT, see `LICENSE`. Third-party components, libraries and AI assistance are listed in `ATTRIBUTION.md`.

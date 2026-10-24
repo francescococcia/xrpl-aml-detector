@@ -142,6 +142,22 @@ v2 gains +6.2 AP and wins every fold.
 
 **For the pitch.** One design choice, rebuilding money flows from the timing of shared-wallet activity, beat every model-tuning knob. In AML, the unit of analysis is the flow, not the single payment.
 
+## 9. Phase 4: weights, gap features, flow smoothing (adopted in v3)
+
+**Leaderboard feedback.** v2 scored 63.5 on the public leaderboard and the leader 71.1, with the same top-1% profile. The gap is in ranking below the top 1%.
+
+**What we changed** *(our data; ideas from an internal audit, re-measured on our folds)*:
+- **Ignore unlearnable positives in training.** Relay positives (aggregate_relay, distributed_relay) and ambiguous ones look like their decoys (phase 2), so they only teach the model noise. We give them `sample_weight` 0. Both GBDTs accept per-sample weights in `fit` ([scikit-learn HGB](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.HistGradientBoostingClassifier.html)). The family label is used only for the weight, never as a feature.
+- **Gap regularity.** Laundering bursts are scripted, so the gaps between payments in a flow are short and regular. We add the median gap and gap CV (std/mean) per flow window (12 features). `fl600_gapcv` is the 8th most important feature.
+- **Flow smoothing.** If one payment of a flow scores high, the rest of the flow is probably laundering too. We add 0.5 × rank of the flow's maximum score (600 s undirected and 3600 s forward flows) to each payment's own rank. AP depends only on the ranking ([scikit-learn AP](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html)), so working on ranks is safe.
+- **Blend 2:1:1** (LightGBM double weight), plus a tiny tie-breaker so the CSV has no tied scores.
+
+**Leakage lesson.** A stage-2 model fed with neighbours' out-of-fold scores looked like +3 AP, but neighbours in other folds were scored by models trained on this row's label. Computed within each fold only, it scored lower and was dropped. Smoothing is computed the same way (same-fold scores only), and it still gives +1.1.
+
+**Result**: v2 59.46 ± 5.82 → v3 **62.22 ± 4.83**, better in 5/5 folds. AP beyond the top 1% rose from 37.3 to 41.1. Chain (73 → 79) and fan_out_in (83 → 86) recovered most of their phase-3 loss, and random gained most (67 → 75). Bipartite dropped (64 → 59).
+
+**Still weak.** The medium tier (9.8 AP) has flows of 1–8 h with gaps like normal activity. Relays and the hard tier are about random. Chain-depth features, value-matched flows and v1 as an extra member gave nothing.
+
 ## Sources opened
 - https://xrpl.org/docs/concepts/accounts
 - https://xrpl.org/docs/references/protocol/data-types/currency-formats

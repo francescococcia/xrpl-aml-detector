@@ -374,9 +374,12 @@ STARTER = ["log_value", "s_out_cnt_7d", "r_in_cnt_7d", "r_out_after_cnt_1h", "s_
            "r_w_passthru", "fwd_ratio_1h"]
 
 
-def feature_columns(df, flows=True):
+def feature_columns(df, flows=True, gaps=True):
+    """flows=False: phase-1 (v1) columns; gaps=False: v2 columns (no phase-4 flow gap stats)."""
     cols = [c for c in df.columns if c not in ("TRANSACTION_HASH",) and not c.startswith("_")]
-    return cols if flows else [c for c in cols if not c.startswith(FLOW_PREFIXES)]
+    if not flows:
+        return [c for c in cols if not c.startswith(FLOW_PREFIXES)]
+    return cols if gaps else [c for c in cols if not c.endswith(("_gapmed", "_gapcv"))]
 
 
 FLOW_PREFIXES = ("fl30_", "fl120_", "fl600_", "flf60_", "flf600_", "flf3600_")
