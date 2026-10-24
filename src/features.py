@@ -15,6 +15,7 @@ import pandas as pd
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "starter"))
 from payments import load_payments, load_rates, XRP, SCALE  # noqa: E402
+from flows import flow_features  # noqa: E402
 
 WINDOWS = {"10m": 600, "1h": 3600, "6h": 6 * 3600, "24h": 86400, "7d": 7 * 86400}
 BIG = 10 ** 8  # > time span in seconds
@@ -359,6 +360,8 @@ def build_features(data_dir):
     feats = pd.DataFrame(F)
     legf = leg_features(data_dir, tx, v)
     feats = pd.concat([feats, legf.reset_index(drop=True)], axis=1)
+    # --- phase 3: label-free flow (burst) reconstruction, group-level aggregates (src/flows.py)
+    feats = pd.concat([feats, flow_features(pay.FROM_ADDRESS.values, pay.TO_ADDRESS.values, t_abs, v)], axis=1)
     feats.insert(0, "TRANSACTION_HASH", pay.TRANSACTION_HASH.values)
     feats["_sender"] = pay.FROM_ADDRESS.values
     feats["_receiver"] = pay.TO_ADDRESS.values
@@ -371,8 +374,12 @@ STARTER = ["log_value", "s_out_cnt_7d", "r_in_cnt_7d", "r_out_after_cnt_1h", "s_
            "r_w_passthru", "fwd_ratio_1h"]
 
 
-def feature_columns(df):
-    return [c for c in df.columns if c not in ("TRANSACTION_HASH",) and not c.startswith("_")]
+def feature_columns(df, flows=True):
+    cols = [c for c in df.columns if c not in ("TRANSACTION_HASH",) and not c.startswith("_")]
+    return cols if flows else [c for c in cols if not c.startswith(FLOW_PREFIXES)]
+
+
+FLOW_PREFIXES = ("fl30_", "fl120_", "fl600_", "flf60_", "flf600_", "flf3600_")
 
 
 if __name__ == "__main__":
