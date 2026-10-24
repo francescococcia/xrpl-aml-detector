@@ -59,6 +59,7 @@ python src/predict.py --cache-dir /tmp/xrpl-cache --rank-features               
 python src/predict.py --cache-dir /tmp/xrpl-cache --pseudo 400                    # pseudo-label top 400 / bottom 50% of test
 python src/predict.py --cache-dir /tmp/xrpl-cache --drop time,legs               # drop feature groups (common.FEATURE_GROUPS)
 python src/predict.py --cache-dir /tmp/xrpl-cache --smooth-agg mean --lam 1       # flow mean instead of max
+python src/predict.py --cache-dir /tmp/xrpl-cache --hgb-full                      # HGB on all rows, no auto early stopping
 # make the best probe the final submission (writes predictions.csv + outputs/final_settings.json for make_zip.py)
 python src/predict.py --cache-dir /tmp/xrpl-cache <best switches> --as-final
 ```
@@ -85,6 +86,9 @@ python experiments/group_robustness.py --train-dir /path/to/train --cache-dir /t
 ## Notes
 - Labels' `family`, `difficulty`, `scenario_id`, `cohort_id` are never used as features;
   `scenario_id` (NaN → unique id) is only the CV grouping key.
+- Reproducibility: LightGBM uses all CPU threads (`n_jobs = cpu count`); float summation order can differ slightly
+  between machines with different thread counts, so scores may differ in late decimals while the ranking (AP) stays the
+  same to about ±0.05. HGB uses scikit-learn's default early stopping (random 10% hold-out, `random_state` 42).
 - Final smoothing weight is λ = 0.25 (`smooth_scores` in `src/common.py`; public LB 64.5 vs 64.4 at λ 0.5).
 - Seeds fixed (42); the final LightGBM is an average of seeds 42–46, and HGB/logistic regression use random_state 42.
 - Old caches (`features_v2_*` to `features_v4_*`) are ignored; the current cache is `features_v5_*` (v4 + a `deliv_asset_code`

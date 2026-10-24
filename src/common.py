@@ -38,10 +38,12 @@ def lgb_params():
                 reg_lambda=1.0, random_state=SEED, n_jobs=os.cpu_count() or 1, verbose=-1)
 
 
-def hgb_model():
+def hgb_model(early_stopping="auto"):
+    """early_stopping='auto' (sklearn default, used by v3): with > 10,000 rows HGB holds out a random, row-level 10% of
+    the training data and stops on it. False: train on every row for all 500 iterations (predict.py --hgb-full)."""
     from sklearn.ensemble import HistGradientBoostingClassifier
     return HistGradientBoostingClassifier(learning_rate=0.05, max_iter=500, max_leaf_nodes=31, min_samples_leaf=40,
-                                          l2_regularization=1.0, random_state=SEED)
+                                          l2_regularization=1.0, random_state=SEED, early_stopping=early_stopping)
 
 
 def rank01(x):
